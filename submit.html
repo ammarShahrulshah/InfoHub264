@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Submit Announcement</title>
+  <link rel="stylesheet" href="submit.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+
+<header class="dashboard-header">
+  <div class="dashboard-navbar">
+    <div class="dashboard-logo">
+      <img src="logo.jpg" alt="InfoHub Logo">
+    </div>
+
+    <nav class="dashboard-links">
+      <a href="home.html">Home</a>
+      <a href="#">News</a>
+      <a href="#">Events</a>
+      <a href="submit.html">Get Published</a>
+      <a href="my-submission.html">My Submission</a>
+      <a href="index.php" class="logout-btn">Logout</a>
+    </nav>
+  </div>
+</header>
+
+<main class="submit-section">
+  <div class="submit-card">
+    <h1>Submit Your Announcement</h1>
+
+    <label>Title</label>
+    <input type="text" id="title" placeholder="Enter announcement title">
+    <small id="titleError"></small>
+
+    <label>Category</label>
+    <select id="category">
+      <option value="">Select category</option>
+      <option>News</option>
+      <option>Event</option>
+      <option>Notice</option>
+    </select>
+    <small id="categoryError"></small>
+
+    <label>Description</label>
+    <textarea id="description" rows="5" placeholder="Write your announcement details"></textarea>
+    <small id="descriptionError"></small>
+
+    <label>Upload Image</label>
+    <input type="file" id="imageUpload">
+    <small id="imageError"></small>
+
+    <button onclick="return validateSubmit()">Submit</button>
+  </div>
+</main>
+
+<script>
+function validateSubmit() {
+  var title = document.getElementById("title").value;
+  var category = document.getElementById("category").value;
+  var description = document.getElementById("description").value;
+  var image = document.getElementById("imageUpload").value;
+  var valid = true;
+
+  document.getElementById("titleError").innerHTML = "";
+  document.getElementById("categoryError").innerHTML = "";
+  document.getElementById("descriptionError").innerHTML = "";
+  document.getElementById("imageError").innerHTML = "";
+
+  if (title == "") {
+    document.getElementById("titleError").innerHTML =
+      "Please enter announcement title.";
+    valid = false;
+  }
+
+  if (category == "") {
+    document.getElementById("categoryError").innerHTML =
+      "Please select a category.";
+    valid = false;
+  }
+
+  if (description == "") {
+    document.getElementById("descriptionError").innerHTML =
+      "Please enter announcement description.";
+    valid = false;
+  } else if (description.length < 20) {
+    document.getElementById("descriptionError").innerHTML =
+      "Description must be at least 20 characters.";
+    valid = false;
+  }
+
+  if (image == "") {
+    document.getElementById("imageError").innerHTML =
+      "Please upload an image.";
+    valid = false;
+  }
+
+  if (valid == true) {
+    alert("Submission sent successfully.");
+    window.location.href = "my-submission.html";
+  }
+
+  return false;
+}
+</script>
+
+</body>
+</html>
