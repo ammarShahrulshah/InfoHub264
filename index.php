@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
         if (password_verify($password, $user['password'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['fullname'] = $user['fullname'];
-            header("Location: home.html");
+            header("Location: home.php");
             exit();
         } else {
             $login_error = "Wrong password!";

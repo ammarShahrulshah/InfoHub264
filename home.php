@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,12 +26,12 @@
       </div>
 
       <nav class="dashboard-links">
-        <a href="home.html">Home</a>
+        <a href="home.php">Home</a>
         <a href="#">News</a>
         <a href="#">Events</a>
-        <a href="submit.html">Get Published</a>
-        <a href="my-submission.html">My Submission</a>
-        <a href="index.php" class="logout-btn">Logout</a>
+        <a href="submit.php">Get Published</a>
+        <a href="my-submission.php">My Submission</a>
+        <a href="logout.php" class="logout-btn">Logout (<?php echo $_SESSION['fullname']; ?>)</a>
       </nav>
 
     </div>
@@ -30,7 +40,7 @@
   <main class="dashboard-container">
 
     <section class="hero">
-      <h1>Welcome to InfoHub</h1>
+      <h1>Welcome to InfoHub, <?php echo $_SESSION['fullname']; ?>!</h1>
       <p>Connect · Inspire · Empower</p>
 
       <div class="search-box">
@@ -40,12 +50,12 @@
     </section>
 
     <section class="quick-actions">
-      <a href="submit.html" class="action-card">
+      <a href="submit.php" class="action-card">
         <h3>✍️ Get Published</h3>
         <p>Submit your announcement, event, or notice.</p>
       </a>
 
-      <a href="my-submission.html" class="action-card">
+      <a href="my-submission.php" class="action-card">
         <h3>📋 My Submission</h3>
         <p>Check your submission status.</p>
       </a>
@@ -71,8 +81,8 @@
 
         <div class="info-card">
           <h3>User Menu</h3>
-          <a href="submit.html" class="side-btn">Submit News</a>
-          <a href="my-submission.html" class="side-btn">View My Submission</a>
+          <a href="submit.php" class="side-btn">Submit News</a>
+          <a href="my-submission.php" class="side-btn">View My Submission</a>
         </div>
       
       </aside>
