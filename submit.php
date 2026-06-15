@@ -12,17 +12,26 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$success_msg = "";
 $error_msg = "";
+$success_msg = "";
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $title = $conn->real_escape_string($_POST['title']);
-    $category = $conn->real_escape_string($_POST['category']);
+    $category_name = $conn->real_escape_string($_POST['category']);
     $content = $conn->real_escape_string($_POST['description']);
     $user_id = $_SESSION['user_id'];
     
-    // Handle image upload
+    // Get cat_ID from category name
+    $cat_result = $conn->query("SELECT cat_ID FROM categories WHERE category_name = '$category_name'");
+    if ($cat_result && $cat_result->num_rows > 0) {
+        $cat_row = $cat_result->fetch_assoc();
+        $cat_id = $cat_row['cat_ID'];
+    } else {
+        $cat_id = 1; // Default to Uncategorized
+    }
+    
+    // Handle image upload (optional)
     $image_path = "";
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         $upload_dir = "uploads/submissions/";
@@ -39,18 +48,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         $image_ext = strtolower(pathinfo($image_name, PATHINFO_EXTENSION));
         
         if (in_array($image_ext, $allowed)) {
-            move_uploaded_file($_FILES['image']['tmp_name'], $image_path);
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
+                // File uploaded successfully
+            } else {
+                $error_msg = "Failed to upload image.";
+            }
         } else {
             $error_msg = "Image type not allowed. Allowed: " . implode(', ', $allowed);
         }
     }
     
     if (empty($error_msg)) {
-        $sql = "INSERT INTO submissions (user_id, title, category, content, image_path, status) 
-                VALUES ('$user_id', '$title', '$category', '$content', '$image_path', 'pending')";
+        // Insert into post table
+        $sql = "INSERT INTO post (User_ID, title, content, status, cat_ID, image_path) 
+                VALUES ('$user_id', '$title', '$content', 'pending', '$cat_id', '$image_path')";
         
         if ($conn->query($sql) === TRUE) {
-            header("Location: my-submission.php?success=1");
+            header("Location: my_submissions.php?success=1");
             exit();
         } else {
             $error_msg = "Error: " . $conn->error;
@@ -66,8 +80,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
   <title>Submit Announcement</title>
   <link rel="stylesheet" href="submit.css">
   <link rel="stylesheet" href="dashboard.css">
-</head>
+  <style>
+    /* Navigation Active Link */
+    .dashboard-links a.active {
+        color: #667eea !important;
+        font-weight: bold !important;
+        border-bottom: 3px solid #667eea !important;
+        padding-bottom: 8px !important;
+    }
+    
+    .dashboard-links a:hover {
+        color: #667eea !important;
+        transition: color 0.2s ease !important;
+    }
+    
+    /* Sign In button */
+    .dashboard-links a.sign-in-btn {
+        background: transparent !important;
+        border: 1.5px solid #667eea !important;
+        padding: 8px 20px !important;
+        border-radius: 40px !important;
+        color: #667eea !important;
+    }
+    
+    .dashboard-links a.sign-in-btn:hover {
+        background: #667eea !important;
+        color: white !important;
+    }
 
+    /* Make textarea paste-friendly */
+    textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 14px;
+        resize: vertical;
+    }
+  </style>
+</head>
 <body>
 
 <header class="dashboard-header">
@@ -78,10 +130,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
     <nav class="dashboard-links">
       <a href="home.php">Home</a>
-      <a href="#">News</a>
-      <a href="#">Events</a>
-      <a href="submit.php">Get Published</a>
-      <a href="my-submission.php">My Submission</a>
+      <a href="notice.php">Notice</a>
+      <a href="news.php">News</a>
+      <a href="events.php">Events</a>
+      <a href="submit.php" class="active">Get Published</a>
+      <a href="my_submissions.php">My Submission</a>
       <a href="logout.php" class="logout-btn">Logout (<?php echo $_SESSION['fullname']; ?>)</a>
     </nav>
   </div>
@@ -91,12 +144,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
   <div class="submit-card">
     <h1>Submit Your Announcement</h1>
     
-    <?php if($success_msg): ?>
-      <p style="color: green; background: #e8f5e9; padding: 10px; border-radius: 5px;">
-        <?php echo $success_msg; ?>
-      </p>
-    <?php endif; ?>
-    
     <?php if($error_msg): ?>
       <p style="color: red; background: #ffebee; padding: 10px; border-radius: 5px;">
         <?php echo $error_msg; ?>
@@ -105,11 +152,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
     <form method="POST" enctype="multipart/form-data" onsubmit="return validateSubmit()">
       <label>Title</label>
-      <input type="text" id="title" name="title" placeholder="Enter announcement title" value="<?php echo isset($_POST['title']) ? htmlspecialchars($_POST['title']) : ''; ?>">
+      <input type="text" id="title" name="title" placeholder="Enter announcement title" value="<?php echo isset($_POST['title']) ? htmlspecialchars($_POST['title']) : ''; ?>" required>
       <small id="titleError"></small>
 
       <label>Category</label>
-      <select id="category" name="category">
+      <select id="category" name="category" required>
         <option value="">Select category</option>
         <option value="News">News</option>
         <option value="Event">Event</option>
@@ -118,10 +165,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
       <small id="categoryError"></small>
 
       <label>Description</label>
-      <textarea id="description" name="description" rows="5" placeholder="Write your announcement details (minimum 20 characters)"><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
+      <textarea id="description" name="description" rows="5" placeholder="Write your announcement details (minimum 20 characters)" required><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
       <small id="descriptionError"></small>
 
-      <label>Upload Image (JPG, PNG, GIF - Max 5MB)</label>
+      <label>Upload Image (Optional - JPG, PNG, GIF)</label>
       <input type="file" id="imageUpload" name="image" accept="image/*">
       <small id="imageError"></small>
 

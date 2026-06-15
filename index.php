@@ -40,7 +40,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['fullname'] = $user['fullname'];
             $_SESSION['role'] = $user['role'];
-            header("Location: home.php");
+            
+            // Redirect based on role
+            if ($user['role'] == 'admin') {
+                header("Location: admin.php");
+            } else {
+                header("Location: home.php");
+            }
             exit();
         } else {
             $login_error = "Wrong password!";
@@ -78,9 +84,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
     </div>
 
     <nav>
-      <a href="visitor.html">Home</a>
-      <a href="#">News</a>
-      <a href="#">Events</a>
+      <a href="visitor.php">Home</a>
+      <a href="notice_visitor.php">Notice</a>
+      <a href="news_visitor.php">News</a>
+      <a href="events_visitor.php">Events</a>
       <button class="signin-btn">Sign In</button>
     </nav>
   </header>
