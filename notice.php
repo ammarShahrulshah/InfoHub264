@@ -113,6 +113,13 @@ $result = $conn->query("
             .notice-card { flex-direction: column; }
             .notice-image { width: 100%; height: 180px; }
         }
+
+             .dashboard-links a.active {
+            color: #667eea !important;
+            font-weight: bold !important;
+            border-bottom: 3px solid #667eea !important;
+            padding-bottom: 8px !important;
+        }
     </style>
 </head>
 <body>

@@ -245,11 +245,12 @@ $result = $conn->query("
 </footer>
 
 <script>
-    // Search function
     document.getElementById('searchBtn').addEventListener('click', function() {
-        var query = document.getElementById('searchInput').value;
+        var query = document.getElementById('searchInput').value.trim();
         if (query) {
-            window.location.href = 'news.php?search=' + encodeURIComponent(query);
+            window.location.href = 'search.php?q=' + encodeURIComponent(query);
+        } else {
+            alert('Please enter a search term');
         }
     });
     

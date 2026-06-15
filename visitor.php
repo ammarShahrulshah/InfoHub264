@@ -248,19 +248,14 @@ $result = $conn->query("
 </footer>
 
 <script>
-    // Search function
-    document.getElementById('searchBtn').addEventListener('click', function() {
-        var query = document.getElementById('searchInput').value;
-        if (query) {
-            window.location.href = 'news_visitor.php?search=' + encodeURIComponent(query);
-        }
-    });
-    
-    document.getElementById('searchInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            document.getElementById('searchBtn').click();
-        }
-    });
+document.getElementById('searchBtn').addEventListener('click', function() {
+    var query = document.getElementById('searchInput').value.trim();
+    if (query) {
+        window.location.href = 'search_visitor.php?q=' + encodeURIComponent(query);
+    } else {
+        alert('Please enter a search term');
+    }
+});
 </script>
 
 </body>
