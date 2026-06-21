@@ -31,7 +31,6 @@ $result = $conn->query("
         .news-hero p { font-size: 18px; opacity: 0.9; }
         .news-container { max-width: 900px; margin: 0 auto; padding: 20px; }
         
-        /* News card dengan gambar di tepi */
         .news-card {
             background: white;
             border-radius: 16px;

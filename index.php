@@ -102,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
       <?php endif; ?>
       
       <form method="POST">
-        <label>Email / Matric Number</label>
+        <label>Email</label>
         <input type="text" name="loginEmail" id="loginEmail" required>
         <small id="loginEmailError"></small>
 

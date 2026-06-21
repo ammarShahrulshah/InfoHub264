@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Check if user is admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin') {
     header("Location: ../index.php");
     exit();
@@ -13,12 +12,11 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Get statistics
 $total_posts = $conn->query("SELECT COUNT(*) as count FROM post")->fetch_assoc()['count'];
 $pending_posts = $conn->query("SELECT COUNT(*) as count FROM post WHERE status='pending'")->fetch_assoc()['count'];
 $approved_posts = $conn->query("SELECT COUNT(*) as count FROM post WHERE status='approved'")->fetch_assoc()['count'];
 
-// Get recent posts
+
 $recent_posts = $conn->query("
     SELECT p.*, u.fullname, c.category_name 
     FROM post p
@@ -248,21 +246,6 @@ $recent_posts = $conn->query("
             location.reload();
         }, 30000);
 
-            // Load dark mode preference
-    if (localStorage.getItem('darkMode') === 'enabled') {
-        document.body.classList.add('dark-theme');
-    }
-
-    // Dark mode toggle (if you have a button)
-    function toggleDarkMode() {
-        if (document.body.classList.contains('dark-theme')) {
-            document.body.classList.remove('dark-theme');
-            localStorage.setItem('darkMode', 'disabled');
-        } else {
-            document.body.classList.add('dark-theme');
-            localStorage.setItem('darkMode', 'enabled');
-        }
-    }
     </script>
 </body>
 </html>

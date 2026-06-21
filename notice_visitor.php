@@ -34,7 +34,6 @@ $result = $conn->query("
         .notices-hero p { font-size: 18px; opacity: 0.9; }
         .notices-container { max-width: 900px; margin: 0 auto; padding: 20px; }
         
-        /* Notice card dengan gambar di tepi - SAMA MACAM HOME */
         .notice-card {
             background: white;
             border-radius: 16px;

@@ -7,6 +7,10 @@
 body {
   background: #f4f7fc;
   font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
 }
 
 .dashboard-header {
@@ -50,10 +54,12 @@ body {
 }
 
 .dashboard-container {
-  max-width: 1200px;
-  margin: auto;
+ max-width: 1200px;
+  margin: 0 auto;
   padding: 0 24px;
   padding-bottom: 20px;
+  flex: 1;
+  width: 100%;
 }
 
 .hero {
@@ -187,10 +193,12 @@ body {
 }
 
 .dashboard-footer {
-  background: white;
+background: white;
   border-top: 1px solid #ddd;
   text-align: center;
   padding: 20px;
+  margin-top: auto;
+  width: 100%;
 }
 
 .news-card {
