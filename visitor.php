@@ -6,9 +6,10 @@ if ($conn->connect_error) {
 }
 
 $result = $conn->query("
-    SELECT p.*, c.category_name 
+    SELECT p.*, c.category_name, d.DepartmentName
     FROM post p
     JOIN categories c ON p.cat_ID = c.cat_ID
+    LEFT JOIN department d ON p.Department_ID = d.Department_ID
     WHERE p.status = 'approved' 
     ORDER BY p.created_at DESC LIMIT 10
 ");
@@ -21,7 +22,6 @@ $result = $conn->query("
     <title>InfoHub Visitor</title>
     <link rel="stylesheet" href="dashboard.css">
     <style>
-        /* Additional styles for active link */
         .dashboard-links a.active {
             color: #667eea !important;
             font-weight: bold !important;
@@ -29,7 +29,6 @@ $result = $conn->query("
             padding-bottom: 8px !important;
         }
             
-        /* News item styling with image */
         .news-item {
             background: white;
             padding: 20px;
@@ -96,7 +95,6 @@ $result = $conn->query("
             text-decoration: underline;
         }
         
-        /* Default image if no image uploaded */
         .default-image {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
@@ -214,7 +212,13 @@ $result = $conn->query("
                             <?php endif; ?>
                         </div>
                         <div class="news-content">
-                            <small><?php echo date('F j, Y', strtotime($row['created_at'] ?? 'now')); ?> · <?php echo htmlspecialchars($row['category_name']); ?></small>
+                             <small>
+                                <?php echo date('F j, Y', strtotime($row['created_at'] ?? 'now')); ?> · 
+                                <?php echo htmlspecialchars($row['category_name']); ?>
+                                <?php if($row['DepartmentName']): ?>
+                                    · 🏢 <?php echo htmlspecialchars($row['DepartmentName']); ?>
+                                <?php endif; ?>
+                            </small>
                             <h4><?php echo htmlspecialchars($row['title']); ?></h4>
                             <p><?php echo htmlspecialchars(substr($row['content'], 0, 100)); ?>...</p>
                             <a href="#" class="read-more-link" onclick="event.stopPropagation(); window.location.href='article.php?id=<?php echo $row['Post_ID']; ?>'">Read More →</a>

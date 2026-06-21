@@ -10,14 +10,16 @@ $search = isset($_GET['q']) ? $conn->real_escape_string($_GET['q']) : '';
 
 // Search in posts
 $result = $conn->query("
-    SELECT p.*, c.category_name, u.fullname
+    SELECT p.*, c.category_name, u.fullname, d.DepartmentName
     FROM post p
     JOIN categories c ON p.cat_ID = c.cat_ID
     JOIN users u ON p.User_ID = u.id
+    LEFT JOIN department d ON p.Department_ID = d.Department_ID
     WHERE p.status = 'approved' 
     AND (p.title LIKE '%$search%' 
     OR p.content LIKE '%$search%'
-    OR c.category_name LIKE '%$search%')
+    OR c.category_name LIKE '%$search%'
+    OR d.DepartmentName LIKE '%$search%')
     ORDER BY p.created_at DESC
 ");
 ?>
@@ -332,7 +334,6 @@ $result = $conn->query("
             <p>Showing results for: <strong><?php echo htmlspecialchars($search); ?></strong></p>
         <?php endif; ?>
         
-        <!-- Search Box di ATAS results -->
         <div class="hero-search-box">
             <form action="search.php" method="get" style="display: flex; width: 100%;">
                 <input type="text" name="q" placeholder="Search announcements, news, or events..." value="<?php echo htmlspecialchars($search); ?>">
@@ -367,6 +368,9 @@ $result = $conn->query("
                             <div class="result-meta">
                                 <span>📅 <?php echo date('F j, Y', strtotime($row['created_at'] ?? 'now')); ?></span>
                                 <span>🏷️ <?php echo htmlspecialchars($row['category_name']); ?></span>
+                                    <?php if($row['DepartmentName']): ?>
+                                        <span>🏢 <?php echo htmlspecialchars($row['DepartmentName']); ?></span>
+                                    <?php endif; ?>
                             </div>
                             <h2 class="result-title"><?php echo htmlspecialchars($row['title']); ?></h2>
                             <p class="result-excerpt"><?php echo htmlspecialchars(substr($row['content'], 0, 120)); ?>...</p>

@@ -18,10 +18,11 @@ $approved_posts = $conn->query("SELECT COUNT(*) as count FROM post WHERE status=
 
 
 $recent_posts = $conn->query("
-    SELECT p.*, u.fullname, c.category_name 
+    SELECT p.*, u.fullname, c.category_name, d.DepartmentName
     FROM post p
     JOIN users u ON p.User_ID = u.id
     JOIN categories c ON p.cat_ID = c.cat_ID
+    LEFT JOIN department d ON p.Department_ID = d.Department_ID
     ORDER BY p.created_at DESC LIMIT 10
 ");
 ?>
@@ -187,41 +188,45 @@ $recent_posts = $conn->query("
 
             <h2>Recent Approval Activity:</h2>
             <table class="activity-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Category</th>
-                        <th>Author</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if ($recent_posts && $recent_posts->num_rows > 0): ?>
-                        <?php while($row = $recent_posts->fetch_assoc()): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($row['title']); ?></td>
-                                <td><?php echo htmlspecialchars($row['category_name']); ?></td>
-                                <td><?php echo htmlspecialchars($row['fullname']); ?></td>
-                                <td>
-                                    <span class="status-<?php echo $row['status']; ?>">
-                                        <?php echo ucfirst($row['status']); ?>
-                                    </span>
-                                </td>
-                                <td><?php echo date('d/m/y', strtotime($row['created_at'])); ?></td>
-                                <td class="action-buttons">
-                                    <button class="btn-view" onclick="window.location.href='view_post.php?id=<?php echo $row['Post_ID']; ?>'">[ View ]</button>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="6" style="text-align: center;">No posts found</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Department</th>
+            <th>Author</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if ($recent_posts && $recent_posts->num_rows > 0): ?>
+            <?php while($row = $recent_posts->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($row['title']); ?></td>
+                    <td><?php echo htmlspecialchars($row['category_name']); ?></td>
+                    <td>
+                        <?php if($row['DepartmentName']): ?>
+                            <?php echo htmlspecialchars($row['DepartmentName']); ?>
+                        <?php else: ?>
+                            -
+                        <?php endif; ?>
+                    </td>
+                    <td><?php echo htmlspecialchars($row['fullname']); ?></td>
+                    <td>
+                        <span class="status-<?php echo $row['status']; ?>">
+                            <?php echo ucfirst($row['status']); ?>
+                        </span>
+                    </td>
+                    <td><?php echo date('d/m/y', strtotime($row['created_at'])); ?></td>
+                    <td class="action-buttons">
+                        <button class="btn-view" onclick="window.location.href='view_post.php?id=<?php echo $row['Post_ID']; ?>'">View</button>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+        <?php endif; ?>
+    </tbody>
+</table>
         </main>
     </div>
 

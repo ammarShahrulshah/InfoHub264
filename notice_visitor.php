@@ -7,10 +7,11 @@ if ($conn->connect_error) {
 
 // Get approved notices from post table
 $result = $conn->query("
-    SELECT p.*, c.category_name 
+    SELECT p.*, c.category_name, d.DepartmentName
     FROM post p
     JOIN categories c ON p.cat_ID = c.cat_ID
-    WHERE c.category_name = 'Notice' AND p.status = 'approved' 
+    LEFT JOIN department d ON p.Department_ID = d.Department_ID
+    WHERE c.category_name = 'notice' AND p.status = 'approved' 
     ORDER BY p.Post_ID DESC
 ");
 ?>
@@ -197,6 +198,9 @@ $result = $conn->query("
                         <div class="notice-meta">
                             <span>📅 <?php echo date('F j, Y', strtotime($row['created_at'] ?? 'now')); ?></span>
                             <span>🏷️ <?php echo htmlspecialchars($row['category_name']); ?></span>
+                                <?php if($row['DepartmentName']): ?>
+                                    <span>🏢 <?php echo htmlspecialchars($row['DepartmentName']); ?></span>
+                                <?php endif; ?>
                         </div>
                         <h2 class="notice-title"><?php echo htmlspecialchars($row['title']); ?></h2>
                         <div class="notice-excerpt"><?php echo htmlspecialchars(substr($row['content'], 0, 100)); ?>...</div>

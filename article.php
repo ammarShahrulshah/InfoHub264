@@ -15,10 +15,11 @@ if ($conn->connect_error) {
 $post_id = $_GET['id'];
 
 $result = $conn->query("
-    SELECT p.*, u.fullname, c.category_name 
+    SELECT p.*, u.fullname, c.category_name, d.DepartmentName
     FROM post p
     JOIN users u ON p.User_ID = u.id
     JOIN categories c ON p.cat_ID = c.cat_ID
+    LEFT JOIN department d ON p.Department_ID = d.Department_ID
     WHERE p.Post_ID = '$post_id' AND p.status = 'approved'
 ");
 
@@ -164,18 +165,18 @@ if (!$row) {
         }
 
         .sign-in-btn {
-    border: 1px solid #2c7da0;
-    padding: 8px 16px;
-    border-radius: 20px;
-    color: #2c7da0 !important;
-    background: transparent;
-    text-decoration: none;
-}
+            border: 1px solid #2c7da0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: #2c7da0 !important;
+            background: transparent;
+            text-decoration: none;
+        }
 
-.sign-in-btn:hover {
-    background: #2c7da0;
-    color: white !important;
-}
+        .sign-in-btn:hover {
+            background: #2c7da0;
+            color: white !important;
+        }
 
         
     </style>
@@ -206,6 +207,9 @@ if (!$row) {
             <p class="article-meta">
                 📅 <?php echo date('F j, Y', strtotime($row['created_at'])); ?> 
                 · 👤 By: <?php echo htmlspecialchars($row['fullname']); ?>
+                <?php if($row['DepartmentName']): ?>
+                    · 🏢 <?php echo htmlspecialchars($row['DepartmentName']); ?>
+                <?php endif; ?>
             </p>
             
             <?php if($row['image_path'] && file_exists($row['image_path'])): ?>

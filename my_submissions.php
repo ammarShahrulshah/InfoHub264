@@ -15,9 +15,10 @@ if ($conn->connect_error) {
 $user_id = $_SESSION['user_id'];
 
 $result = $conn->query("
-    SELECT p.*, c.category_name 
+    SELECT p.*, c.category_name, d.DepartmentName
     FROM post p
     LEFT JOIN categories c ON p.cat_ID = c.cat_ID
+    LEFT JOIN department d ON p.Department_ID = d.Department_ID
     WHERE p.User_ID = '$user_id' 
     ORDER BY p.Post_ID DESC
 ");
@@ -72,7 +73,6 @@ $result = $conn->query("
         .alert-success { background: #d4edda; color: #155724; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
         .alert-warning { background: #fff3cd; color: #856404; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
         
-        /* Read More Button Style */
         .read-more-btn {
             background: #667eea;
             border: none;
@@ -104,21 +104,20 @@ $result = $conn->query("
             background: #5a6268;
         }
         
-        /* Full Content Expanded Style */
         .full-content {
-          display: none;
-    margin-top: 15px;
-    padding: 20px;
-    background: #f9f9f9;
-    border-radius: 12px;
-    border-left: 4px solid #667eea;
-    line-height: 1.8;
-    color: #333;
-    font-size: 15px;
-    white-space: normal;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    text-align: justify;
+            display: none;
+            margin-top: 15px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            line-height: 1.8;
+            color: #333;
+            font-size: 15px;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            text-align: justify;
         }
 
         /* Navigation Active Link */
@@ -137,6 +136,9 @@ $result = $conn->query("
             color: #667eea !important;
         }
         .dashboard-links a.sign-in-btn:hover { background: #667eea !important; color: white !important; }
+
+        .back-home { text-align: center; margin: 30px 0; }
+        .back-home a { color: #667eea; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -193,6 +195,9 @@ $result = $conn->query("
                     <div class="submission-meta">
                         <span>📅 <?php echo date('F j, Y', strtotime($row['created_at'] ?? 'now')); ?></span>
                         <span class="submission-category">🏷️ <?php echo htmlspecialchars($row['category_name'] ?? 'Uncategorized'); ?></span>
+                            <?php if($row['DepartmentName']): ?>
+                                <span>🏢 <?php echo htmlspecialchars($row['DepartmentName']); ?></span>
+                            <?php endif; ?>
                     </div>
                     <div class="submission-content">
                         <?php 
@@ -202,7 +207,6 @@ $result = $conn->query("
                         ?>
                     </div>
                     
-                    <!-- Read More Button - Expand Content Below (PASTI JALAN) -->
                     <button class="read-more-btn" onclick="this.style.display='none'; this.nextElementSibling.style.display='block'">📖 Read More</button>
                     <div class="full-content">
                         <?php echo nl2br(htmlspecialchars($row['content'])); ?>

@@ -15,12 +15,13 @@ if ($conn->connect_error) {
 
 // Get only approved posts
 $approved_posts = $conn->query("
-    SELECT p.*, u.fullname, u.email, c.category_name 
+    SELECT p.*, u.fullname, u.email, c.category_name, d.DepartmentName
     FROM post p
     JOIN users u ON p.User_ID = u.id
     JOIN categories c ON p.cat_ID = c.cat_ID
+    LEFT JOIN department d ON p.Department_ID = d.Department_ID
     WHERE p.status = 'approved'
-    ORDER BY p.created_at DESC
+    ORDER BY p.created_at ASC
 ");
 
 // Get statistics
@@ -37,7 +38,6 @@ $total_posts = $conn->query("SELECT COUNT(*) as count FROM post")->fetch_assoc()
     <title>Published Posts - Admin | InfoHub</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Same as admin.php */
         .dashboard-cards {
             display: flex;
             gap: 20px;
@@ -131,21 +131,19 @@ $total_posts = $conn->query("SELECT COUNT(*) as count FROM post")->fetch_assoc()
 
         <main class="main-content">
             <h2>Published Posts</h2>
-            <p>All approved posts that are live on the website.</p>
 
-            <!-- Dashboard Cards SAMA MACAM admin.php -->
             <div class="dashboard-cards">
                 <div class="card highlight-card">
                     <h3><?php echo $total_posts; ?></h3>
                     <p>Total Posts</p>
                 </div>
                 <div class="card">
-                    <h3><?php echo $total_approved; ?></h3>
-                    <p>Published</p>
-                </div>
-                <div class="card">
                     <h3><?php echo $total_pending; ?></h3>
                     <p>Pending Approvals</p>
+                </div>
+                <div class="card">
+                    <h3><?php echo $total_approved; ?></h3>
+                    <p>Approved</p>
                 </div>
             </div>
 
@@ -157,40 +155,47 @@ $total_posts = $conn->query("SELECT COUNT(*) as count FROM post")->fetch_assoc()
                 <button class="filter-btn" onclick="filterPosts('Notice')">Notices</button>
             </div>
 
-            <!-- Activity Table SAMA MACAM admin.php -->
             <table class="activity-table" id="postsTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Title</th>
-                        <th>Category</th>
-                        <th>Author</th>
-                        <th>Date</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if ($approved_posts && $approved_posts->num_rows > 0): ?>
-                        <?php while($row = $approved_posts->fetch_assoc()): ?>
-                            <tr data-category="<?php echo $row['category_name']; ?>">
-                                <td><?php echo $row['Post_ID']; ?></td>
-                                <td><?php echo htmlspecialchars($row['title']); ?></td>
-                                <td><span class="status-approved"><?php echo $row['category_name']; ?></span></td>
-                                <td><?php echo htmlspecialchars($row['fullname']); ?></td>
-                                <td><?php echo date('d/m/y', strtotime($row['created_at'])); ?></td>
-                                <td class="action-buttons">
-                                    <button class="btn-view" onclick="window.location.href='view_post.php?id=<?php echo $row['Post_ID']; ?>'">View</button>
-                                    <button class="btn-delete" onclick="if(confirm('Delete this post?')) window.location.href='delete_post.php?id=<?php echo $row['Post_ID']; ?>'">Delete</button>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="6" style="text-align: center;">No published posts found</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Department</th>
+            <th>Author</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if ($approved_posts && $approved_posts->num_rows > 0): ?>
+            <?php while($row = $approved_posts->fetch_assoc()): ?>
+                <tr data-category="<?php echo $row['category_name']; ?>">
+                    <td><?php echo $row['Post_ID']; ?></td>
+                    <td><?php echo htmlspecialchars($row['title']); ?></td>
+                    <td><span class="status-approved"><?php echo $row['category_name']; ?></span></td>
+                    <td>
+                        <?php if($row['DepartmentName']): ?>
+                            <?php echo htmlspecialchars($row['DepartmentName']); ?>
+                        <?php else: ?>
+                            -
+                        <?php endif; ?>
+                    </td>
+                    <td><?php echo htmlspecialchars($row['fullname']); ?></td>
+                    <td><?php echo date('d/m/y', strtotime($row['created_at'])); ?></td>
+                    <td class="action-buttons">
+                        <button class="btn-view" onclick="window.location.href='view_post.php?id=<?php echo $row['Post_ID']; ?>'">View</button>
+                        <button class="btn-delete" onclick="if(confirm('Delete this post?')) window.location.href='delete_post.php?id=<?php echo $row['Post_ID']; ?>'">Delete</button>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="7" style="text-align: center;">No published posts found</td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
+</table>
         </main>
     </div>
 

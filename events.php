@@ -4,9 +4,10 @@ $conn = new mysqli("localhost", "root", "", "infohub_db");
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
 $result = $conn->query("
-    SELECT p.*, c.category_name 
+    SELECT p.*, c.category_name, d.DepartmentName
     FROM post p
     JOIN categories c ON p.cat_ID = c.cat_ID
+    LEFT JOIN department d ON p.Department_ID = d.Department_ID
     WHERE c.category_name = 'Event' AND p.status = 'approved' 
     ORDER BY p.Post_ID DESC
 ");
@@ -107,7 +108,9 @@ $result = $conn->query("
         }
         
         .empty-events { text-align: center; padding: 60px 20px; background: white; border-radius: 16px; }
+
         .back-home { text-align: center; margin: 30px 0; }
+        .back-home a { color: #667eea; text-decoration: none; }
         
         @media (max-width: 768px) {
             .event-card { flex-direction: column; }
@@ -156,9 +159,12 @@ $result = $conn->query("
                         <?php endif; ?>
                     </div>
                     <div class="event-content">
-                        <div class="event-meta">
+                       <div class="event-meta">
                             <span>📅 <?php echo date('F j, Y', strtotime($row['created_at'] ?? 'now')); ?></span>
                             <span>🏷️ <?php echo htmlspecialchars($row['category_name']); ?></span>
+                                <?php if($row['DepartmentName']): ?>
+                                    <span>🏢 <?php echo htmlspecialchars($row['DepartmentName']); ?></span>
+                                <?php endif; ?>
                         </div>
                         <h2 class="event-title"><?php echo htmlspecialchars($row['title']); ?></h2>
                         <div class="event-excerpt"><?php echo htmlspecialchars(substr($row['content'], 0, 100)); ?>...</div>

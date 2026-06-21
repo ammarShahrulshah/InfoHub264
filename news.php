@@ -4,9 +4,10 @@ $conn = new mysqli("localhost", "root", "", "infohub_db");
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
 $result = $conn->query("
-    SELECT p.*, c.category_name 
+    SELECT p.*, c.category_name, d.DepartmentName
     FROM post p
     JOIN categories c ON p.cat_ID = c.cat_ID
+    LEFT JOIN department d ON p.Department_ID = d.Department_ID
     WHERE c.category_name = 'News' AND p.status = 'approved' 
     ORDER BY p.Post_ID DESC
 ");
@@ -176,10 +177,13 @@ $result = $conn->query("
                         <?php endif; ?>
                     </div>
                     <div class="news-content">
-                        <div class="news-meta">
-                            <span>📅 <?php echo date('F j, Y', strtotime($row['created_at'] ?? 'now')); ?></span>
-                            <span>🏷️ <?php echo htmlspecialchars($row['category_name']); ?></span>
-                        </div>
+                    <div class="news-meta">
+                        <span>📅 <?php echo date('F j, Y', strtotime($row['created_at'] ?? 'now')); ?></span>
+                        <span>🏷️ <?php echo htmlspecialchars($row['category_name']); ?></span>
+                        <?php if($row['DepartmentName']): ?>
+                            <span>🏢 <?php echo htmlspecialchars($row['DepartmentName']); ?></span>
+                        <?php endif; ?>
+                    </div>
                         <h2 class="news-title"><?php echo htmlspecialchars($row['title']); ?></h2>
                         <div class="news-excerpt"><?php echo htmlspecialchars(substr($row['content'], 0, 100)); ?>...</div>
                         <a href="#" class="read-more" onclick="event.stopPropagation(); window.location.href='article.php?id=<?php echo $row['Post_ID']; ?>'">Read More →</a>

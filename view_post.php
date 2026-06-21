@@ -15,10 +15,11 @@ if ($conn->connect_error) {
 $post_id = $_GET['id'];
 
 $result = $conn->query("
-    SELECT p.*, u.fullname, u.email, c.category_name 
+    SELECT p.*, u.fullname, u.email, c.category_name, d.DepartmentName
     FROM post p
     JOIN users u ON p.User_ID = u.id
     JOIN categories c ON p.cat_ID = c.cat_ID
+    LEFT JOIN department d ON p.Department_ID = d.Department_ID
     WHERE p.Post_ID = '$post_id'
 ");
 
@@ -48,7 +49,6 @@ $is_logged_in = isset($_SESSION['user_id']);
             background: #f4f7fc;
         }
 
-        /* Navbar Ringkas - Logo + Logout Sahaja */
         .dashboard-header {
             background: white;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -73,7 +73,7 @@ $is_logged_in = isset($_SESSION['user_id']);
         .dashboard-links {
             display: flex;
             align-items: center;
-    m       argin-left: auto; 
+           margin-left: auto; 
         }
 
         .logout-btn {
@@ -120,11 +120,10 @@ $is_logged_in = isset($_SESSION['user_id']);
             opacity: 0.9;
         }
 
-        /* Gambar - Auto Size Muat Dalam Kotak */
         .post-image {
             width: 100%;
-            max-height: 400px;
-            object-fit: contain;
+            max-height: 100%;
+            object-fit: cover;
             background: #f0f0f0;
             display: block;
         }
@@ -236,7 +235,6 @@ $is_logged_in = isset($_SESSION['user_id']);
 </head>
 <body>
 
-<!-- Navbar Ringkas - Logo + Logout Sahaja -->
 <header class="dashboard-header">
     <div class="dashboard-navbar">
         <div class="dashboard-logo">
@@ -260,13 +258,15 @@ $is_logged_in = isset($_SESSION['user_id']);
                 <span>📅 <?php echo date('F j, Y', strtotime($row['created_at'])); ?></span>
                 <span>👤 By: <?php echo htmlspecialchars($row['fullname']); ?></span>
                 <span class="badge"><?php echo htmlspecialchars($row['category_name']); ?></span>
-                <span class="status-badge status-<?php echo $row['status']; ?>">
-                    <?php echo ucfirst($row['status']); ?>
+                    <?php if($row['DepartmentName']): ?>
+                        <span class="badge">🏢 <?php echo htmlspecialchars($row['DepartmentName']); ?></span>
+                    <?php endif; ?>
+                    <span class="status-badge status-<?php echo $row['status']; ?>">
+                        <?php echo ucfirst($row['status']); ?>
                 </span>
             </div>
         </div>
 
-        <!-- Gambar - Auto Size, Muat Dalam Kotak -->
         <?php if($row['image_path']): ?>
             <img src="<?php echo $row['image_path']; ?>" class="post-image" alt="Post image">
         <?php endif; ?>
