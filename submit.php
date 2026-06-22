@@ -181,6 +181,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
             <a href="events.php">Events</a>
             <a href="submit.php" class="active">Get Published</a>
             <a href="my_submissions.php">My Submission</a>
+            <a href="edit_profile.php">Edit Profile</a>
             <a href="logout.php" class="logout-btn">Logout (<?php echo $_SESSION['fullname']; ?>)</a>
         </nav>
     </div>

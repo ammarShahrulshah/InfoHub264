@@ -151,6 +151,7 @@ $result = $conn->query("
             <a href="events.php">Events</a>
             <a href="submit.php">Get Published</a>
             <a href="my_submissions.php">My Submission</a>
+            <a href="edit_profile.php">Edit Profile</a>
             <?php if(isset($_SESSION['user_id'])): ?>
                 <a href="logout.php" class="logout-btn">Logout (<?php echo $_SESSION['fullname']; ?>)</a>
             <?php else: ?>
