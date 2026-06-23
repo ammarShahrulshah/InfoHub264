@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
     }
 }
 
-// Handle Sign In - TAPI validation dah di JavaScript, so PHP hanya process
+// Handle Sign In
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
     $email = $conn->real_escape_string($_POST['loginEmail']);
     $password = $_POST['loginPassword'];
@@ -47,7 +47,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
             }
             exit();
         } else {
-            // Set error untuk ditunjuk melalui JavaScript
             $login_error = "Wrong password!";
         }
     } else {
@@ -132,19 +131,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
       
       <form method="POST" onsubmit="return validateSignup()">
         <label>Full Name</label>
-        <input type="text" name="signupName" id="signupName" required>
+        <input type="text" name="signupName" id="signupName">
         <small id="signupNameError"></small>
 
         <label>Email</label>
-        <input type="email" name="signupEmail" id="signupEmail" required>
+        <input type="text" name="signupEmail" id="signupEmail">
         <small id="signupEmailError"></small>
 
         <label>Password</label>
-        <input type="password" name="signupPassword" id="signupPassword" required>
+        <input type="password" name="signupPassword" id="signupPassword">
         <small id="signupPasswordError"></small>
 
         <label>Confirm Password</label>
-        <input type="password" id="confirmPassword" required>
+        <input type="password" id="confirmPassword">
         <small id="confirmPasswordError"></small>
 
         <button type="submit" name="signup" class="login-btn">Create Account</button>
@@ -181,6 +180,7 @@ function showSignin() {
     document.getElementById("signin").style.display = "block";
 }
 
+// ========== SIGN IN VALIDATION ==========
 function validateLogin() {
     var email = document.getElementById("loginEmail").value;
     var password = document.getElementById("loginPassword").value;
@@ -208,6 +208,7 @@ function validateLogin() {
     return valid;
 }
 
+// ========== SIGN UP VALIDATION ==========
 function validateSignup() {
     var name = document.getElementById("signupName").value;
     var email = document.getElementById("signupEmail").value;
