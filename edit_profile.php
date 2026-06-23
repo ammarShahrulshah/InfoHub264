@@ -145,6 +145,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
             color: #333;
             margin-bottom: 20px;
         }
+        small {
+            color: #dc3545;
+            font-size: 12px;
+            display: block;
+            margin-top: 3px;
+        }
+        .error-text {
+            color: #dc3545;
+            font-size: 12px;
+            display: block;
+            margin-top: 3px;
+        }
 
         .dashboard-links a.active {
             color: #667eea !important;
@@ -187,14 +199,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
         <?php endif; ?>
 
         <!-- Update Profile Form -->
-        <form method="POST">
+        <form method="POST" onsubmit="return validateProfile()">
             <div class="form-group">
                 <label>Full Name</label>
-                <input type="text" name="fullname" value="<?php echo htmlspecialchars($user['fullname']); ?>" required>
+                <input type="text" name="fullname" id="fullname" value="<?php echo htmlspecialchars($user['fullname']); ?>">
+                <small id="fullnameError"></small>
             </div>
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($user['email']); ?>">
+                <small id="emailError"></small>
             </div>
             <button type="submit" name="update_profile" class="btn-save">Update Profile</button>
         </form>
@@ -203,18 +217,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
 
         <!-- Change Password Form -->
         <h3>🔒 Change Password</h3>
-        <form method="POST">
+        <form method="POST" onsubmit="return validatePassword()">
             <div class="form-group">
                 <label>Current Password</label>
-                <input type="password" name="current_password" placeholder="Enter current password" required>
+                <input type="password" name="current_password" id="current_password" placeholder="Enter current password">
+                <small id="currentPasswordError"></small>
             </div>
             <div class="form-group">
                 <label>New Password</label>
-                <input type="password" name="new_password" placeholder="Enter new password (min 6 characters)" required>
+                <input type="password" name="new_password" id="new_password" placeholder="Enter new password (min 6 characters)">
+                <small id="newPasswordError"></small>
             </div>
             <div class="form-group">
                 <label>Confirm New Password</label>
-                <input type="password" name="confirm_password" placeholder="Confirm new password" required>
+                <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm new password">
+                <small id="confirmPasswordError"></small>
             </div>
             <button type="submit" name="change_password" class="btn-save">Change Password</button>
         </form>
@@ -226,6 +243,76 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
 <footer class="dashboard-footer">
     <p>© 2026 InfoHub Team. Connect · Inspire · Empower</p>
 </footer>
+
+<script>
+function validateProfile() {
+    var fullname = document.getElementById("fullname").value.trim();
+    var email = document.getElementById("email").value.trim();
+    var valid = true;
+
+    // Reset errors
+    document.getElementById("fullnameError").innerHTML = "";
+    document.getElementById("emailError").innerHTML = "";
+
+    // Validate Full Name
+    if (fullname == "") {
+        document.getElementById("fullnameError").innerHTML = "Please enter your full name.";
+        valid = false;
+    }
+
+    // Validate Email
+    if (email == "") {
+        document.getElementById("emailError").innerHTML = "Please enter your email address.";
+        valid = false;
+    } else if (email.indexOf("@") == -1) {
+        document.getElementById("emailError").innerHTML = "Please enter a valid email address (e.g., name@domain.com).";
+        valid = false;
+    } else if (email.indexOf(".") == -1) {
+        document.getElementById("emailError").innerHTML = "Please enter a valid email address with a domain (e.g., .com, .my).";
+        valid = false;
+    }
+
+    return valid;
+}
+
+function validatePassword() {
+    var current = document.getElementById("current_password").value;
+    var newPass = document.getElementById("new_password").value;
+    var confirm = document.getElementById("confirm_password").value;
+    var valid = true;
+
+    // Reset errors
+    document.getElementById("currentPasswordError").innerHTML = "";
+    document.getElementById("newPasswordError").innerHTML = "";
+    document.getElementById("confirmPasswordError").innerHTML = "";
+
+    // Validate Current Password
+    if (current == "") {
+        document.getElementById("currentPasswordError").innerHTML = "Please enter your current password.";
+        valid = false;
+    }
+
+    // Validate New Password
+    if (newPass == "") {
+        document.getElementById("newPasswordError").innerHTML = "Please enter a new password.";
+        valid = false;
+    } else if (newPass.length < 6) {
+        document.getElementById("newPasswordError").innerHTML = "Password must be at least 6 characters.";
+        valid = false;
+    }
+
+    // Validate Confirm Password
+    if (confirm == "") {
+        document.getElementById("confirmPasswordError").innerHTML = "Please confirm your new password.";
+        valid = false;
+    } else if (newPass != confirm) {
+        document.getElementById("confirmPasswordError").innerHTML = "Passwords do not match.";
+        valid = false;
+    }
+
+    return valid;
+}
+</script>
 
 </body>
 </html>

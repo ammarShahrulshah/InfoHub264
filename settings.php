@@ -22,14 +22,19 @@ $user_data = $user_result->fetch_assoc();
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
     $fullname = $conn->real_escape_string($_POST['fullname']);
     $email = $conn->real_escape_string($_POST['email']);
-    $phone = $conn->real_escape_string($_POST['phone']);
     
-    $conn->query("UPDATE users SET fullname='$fullname', email='$email' WHERE id='$user_id'");
-    
-    // Update session
-    $_SESSION['fullname'] = $fullname;
-    
-    $success_msg = "Profile updated successfully!";
+    // Check if email already exists (except own email)
+    $check = $conn->query("SELECT id FROM users WHERE email = '$email' AND id != '$user_id'");
+    if ($check->num_rows > 0) {
+        $error_msg = "Email already registered by another user!";
+    } else {
+        $conn->query("UPDATE users SET fullname='$fullname', email='$email' WHERE id='$user_id'");
+        $_SESSION['fullname'] = $fullname;
+        $success_msg = "Profile updated successfully!";
+        // Refresh user data
+        $user_result = $conn->query("SELECT * FROM users WHERE id = '$user_id'");
+        $user_data = $user_result->fetch_assoc();
+    }
 }
 
 // Handle password change
@@ -60,7 +65,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
     <title>InfoHub - Settings</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Settings page specific styles */
         .tab-navigation {
             display: flex;
             gap: 10px;
@@ -211,16 +215,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
         .btn-data:hover {
             background: #e0e0e0;
         }
+        small {
+            color: #dc3545;
+            font-size: 12px;
+            display: block;
+            margin-top: 3px;
+        }
     </style>
 </head>
 <body>
-    <script>
-        // Load dark mode preference
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-theme');
-        }
-    </script>
-
     <header class="top-nav">
         <div class="logo">
             <img src="logo.jpg" alt="InfoHub Logo" class="logo-img">
@@ -249,6 +252,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
             <?php if(isset($success_msg)): ?>
                 <div class="notification">✓ <?php echo $success_msg; ?></div>
             <?php endif; ?>
+            <?php if(isset($error_msg)): ?>
+                <div class="notification error">✗ <?php echo $error_msg; ?></div>
+            <?php endif; ?>
             <?php if(isset($pass_msg)): ?>
                 <div class="notification">✓ <?php echo $pass_msg; ?></div>
             <?php endif; ?>
@@ -264,14 +270,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
             <!-- ================= TAB 1: PROFILE ================= -->
             <div id="profile" class="tab-content active">
                 <h3>Admin Profile</h3>
-                <form class="settings-form" method="POST">
+                <form class="settings-form" method="POST" onsubmit="return validateProfile()">
                     <div class="form-group">
                         <label>Full Name</label>
-                        <input type="text" name="fullname" value="<?php echo htmlspecialchars($user_data['fullname']); ?>" class="form-control" required>
+                        <input type="text" name="fullname" id="fullname" value="<?php echo htmlspecialchars($user_data['fullname']); ?>" class="form-control">
+                        <small id="fullnameError"></small>
                     </div>
                     <div class="form-group">
                         <label>Email Address</label>
-                        <input type="email" name="email" value="<?php echo htmlspecialchars($user_data['email']); ?>" class="form-control" required>
+                        <input type="email" name="email" id="email" value="<?php echo htmlspecialchars($user_data['email']); ?>" class="form-control">
+                        <small id="emailError"></small>
                     </div>
                     
                     <hr style="margin: 25px 0; border: 0; border-top: 1px solid #eee;">
@@ -281,77 +289,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
                 
                 <!-- Change Password Form -->
                 <h3 style="margin-top: 30px;">Change Password</h3>
-                <form class="settings-form" method="POST">
+                <form class="settings-form" method="POST" onsubmit="return validatePassword()">
                     <div class="form-group">
                         <label>Current Password</label>
-                        <input type="password" name="current_password" class="form-control" placeholder="••••••••" required>
+                        <input type="password" name="current_password" id="current_password" class="form-control" placeholder="••••••••">
+                        <small id="currentPasswordError"></small>
                     </div>
                     <div class="form-group">
                         <label>New Password</label>
-                        <input type="password" name="new_password" class="form-control" placeholder="Minimum 6 characters" required>
+                        <input type="password" name="new_password" id="new_password" class="form-control" placeholder="Minimum 6 characters">
+                        <small id="newPasswordError"></small>
                     </div>
                     <div class="form-group">
                         <label>Confirm New Password</label>
-                        <input type="password" name="confirm_password" class="form-control" placeholder="Confirm new password" required>
+                        <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Confirm new password">
+                        <small id="confirmPasswordError"></small>
                     </div>
                     <button type="submit" name="change_password" class="btn-save">Change Password</button>
                 </form>
             </div>
-
-            <!-- ================= TAB 2: APPEARANCE ================= -->
-            <div id="appearance" class="tab-content hidden">
-                <h3>System Appearance</h3>
-                <div class="settings-form">
-                    <div class="setting-row">
-                        <div>
-                            <strong>Dark Mode</strong>
-                            <p class="text-muted">Switch to dark theme for better night-time viewing.</p>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" id="darkModeToggle">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= TAB 3: SECURITY ================= -->
-            <div id="security" class="tab-content hidden">
-                <h3>Security & Access</h3>
-                <div class="settings-form">
-                    <div class="setting-row">
-                        <div>
-                            <strong>New Login Alerts</strong>
-                            <p class="text-muted">Send email notification when new device logs in.</p>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" checked>
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <h3 style="margin-top: 30px;">Recent Login History</h3>
-                <table class="activity-table">
-                    <thead>
-                        <tr>
-                            <th>Device / Browser</th>
-                            <th>IP Address</th>
-                            <th>Location</th>
-                            <th>Time & Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Chrome on Windows 11</td>
-                            <td>192.168.1.42</td>
-                            <td>Kuala Lumpur, MY</td>
-                            <td>Today, <?php echo date('h:i A'); ?></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
         </main>
     </div>
 
@@ -372,22 +328,66 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
             });
         });
 
-        // Dark Mode Toggle
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            darkModeToggle.checked = true;
-        }
-        
-        darkModeToggle.addEventListener('change', () => {
-            if (darkModeToggle.checked) {
-                document.body.classList.add('dark-theme');
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                document.body.classList.remove('dark-theme');
-                localStorage.setItem('darkMode', 'disabled');
+        function validateProfile() {
+            var fullname = document.getElementById("fullname").value.trim();
+            var email = document.getElementById("email").value.trim();
+            var valid = true;
+
+            document.getElementById("fullnameError").innerHTML = "";
+            document.getElementById("emailError").innerHTML = "";
+
+            if (fullname == "") {
+                document.getElementById("fullnameError").innerHTML = "Please enter your full name.";
+                valid = false;
             }
-        });
+
+            if (email == "") {
+                document.getElementById("emailError").innerHTML = "Please enter your email address.";
+                valid = false;
+            } else if (email.indexOf("@") == -1) {
+                document.getElementById("emailError").innerHTML = "Please enter a valid email address (e.g., name@domain.com).";
+                valid = false;
+            } else if (email.indexOf(".") == -1) {
+                document.getElementById("emailError").innerHTML = "Please enter a valid email address with a domain (e.g., .com, .my).";
+                valid = false;
+            }
+
+            return valid;
+        }
+
+        function validatePassword() {
+            var current = document.getElementById("current_password").value;
+            var newPass = document.getElementById("new_password").value;
+            var confirm = document.getElementById("confirm_password").value;
+            var valid = true;
+
+            document.getElementById("currentPasswordError").innerHTML = "";
+            document.getElementById("newPasswordError").innerHTML = "";
+            document.getElementById("confirmPasswordError").innerHTML = "";
+
+            if (current == "") {
+                document.getElementById("currentPasswordError").innerHTML = "Please enter your current password.";
+                valid = false;
+            }
+
+            if (newPass == "") {
+                document.getElementById("newPasswordError").innerHTML = "Please enter a new password.";
+                valid = false;
+            } else if (newPass.length < 6) {
+                document.getElementById("newPasswordError").innerHTML = "Password must be at least 6 characters.";
+                valid = false;
+            }
+
+            if (confirm == "") {
+                document.getElementById("confirmPasswordError").innerHTML = "Please confirm your new password.";
+                valid = false;
+            } else if (newPass != confirm) {
+                document.getElementById("confirmPasswordError").innerHTML = "Passwords do not match.";
+                valid = false;
+            }
+
+            return valid;
+        }
     </script>
 </body>
 </html>
