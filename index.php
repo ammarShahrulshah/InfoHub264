@@ -12,9 +12,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
     $fullname = $conn->real_escape_string($_POST['signupName']);
     $email = $conn->real_escape_string($_POST['signupEmail']);
     $password = password_hash($_POST['signupPassword'], PASSWORD_DEFAULT);
-    $role = 'user'; // Default role untuk user baru
+    $role = 'user';
     
-    // Check email already registered
     $check = $conn->query("SELECT * FROM users WHERE email='$email'");
     
     if ($check->num_rows > 0) {
@@ -28,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signup'])) {
     }
 }
 
-// Handle Sign In
+// Handle Sign In - TAPI validation dah di JavaScript, so PHP hanya process
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
     $email = $conn->real_escape_string($_POST['loginEmail']);
     $password = $_POST['loginPassword'];
@@ -41,7 +40,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
             $_SESSION['fullname'] = $user['fullname'];
             $_SESSION['role'] = $user['role'];
             
-            // Redirect based on role
             if ($user['role'] == 'admin') {
                 header("Location: admin.php");
             } else {
@@ -49,6 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
             }
             exit();
         } else {
+            // Set error untuk ditunjuk melalui JavaScript
             $login_error = "Wrong password!";
         }
     } else {
@@ -65,7 +64,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
   <link rel="stylesheet" href="login.css">
   <link rel="stylesheet" href="dashboard.css">
   <style>
-    /* Additional styles for better display */
     .error-message {
       color: red;
       background: #ffebee;
@@ -73,9 +71,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
       border-radius: 5px;
       margin-bottom: 15px;
     }
+    small {
+      color: red;
+      font-size: 12px;
+      display: block;
+      margin-top: 3px;
+    }
   </style>
 </head>
-
 <body>
 
   <header class="login-navbar">
@@ -97,17 +100,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
     <!-- Sign In Card -->
     <div class="login-card" id="signin" style="<?php echo ($show_signup) ? 'display:none;' : 'display:block;'; ?>">
       <h1>Sign In</h1>
+      
       <?php if(isset($login_error)): ?>
         <div class="error-message"><?php echo $login_error; ?></div>
       <?php endif; ?>
       
-      <form method="POST">
+      <form method="POST" onsubmit="return validateLogin()">
         <label>Email</label>
-        <input type="text" name="loginEmail" id="loginEmail" required>
+        <input type="text" name="loginEmail" id="loginEmail">
         <small id="loginEmailError"></small>
 
         <label>Password</label>
-        <input type="password" name="loginPassword" id="loginPassword" required>
+        <input type="password" name="loginPassword" id="loginPassword">
         <small id="loginPasswordError"></small>
 
         <button type="submit" name="signin" class="login-btn">Login to InfoHub</button>
@@ -126,7 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
         <div class="error-message"><?php echo $signup_error; ?></div>
       <?php endif; ?>
       
-      <form method="POST">
+      <form method="POST" onsubmit="return validateSignup()">
         <label>Full Name</label>
         <input type="text" name="signupName" id="signupName" required>
         <small id="signupNameError"></small>
@@ -143,7 +147,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
         <input type="password" id="confirmPassword" required>
         <small id="confirmPasswordError"></small>
 
-        <button type="submit" name="signup" class="login-btn" onclick="return validateSignup()">Create Account</button>
+        <button type="submit" name="signup" class="login-btn">Create Account</button>
       </form>
 
       <p class="switch-text">
@@ -167,65 +171,87 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin'])) {
   </footer>
 
   <script>
-    function showSignup() {
-      document.getElementById("signin").style.display = "none";
-      document.getElementById("signup").style.display = "block";
+function showSignup() {
+    document.getElementById("signin").style.display = "none";
+    document.getElementById("signup").style.display = "block";
+}
+
+function showSignin() {
+    document.getElementById("signup").style.display = "none";
+    document.getElementById("signin").style.display = "block";
+}
+
+function validateLogin() {
+    var email = document.getElementById("loginEmail").value;
+    var password = document.getElementById("loginPassword").value;
+    var valid = true;
+
+    document.getElementById("loginEmailError").innerHTML = "";
+    document.getElementById("loginPasswordError").innerHTML = "";
+
+    if (email == "") {
+        document.getElementById("loginEmailError").innerHTML = "Please enter your email address.";
+        valid = false;
+    } else if (email.indexOf("@") == -1) {
+        document.getElementById("loginEmailError").innerHTML = "Please enter a valid email address.";
+        valid = false;
     }
 
-    function showSignin() {
-      document.getElementById("signup").style.display = "none";
-      document.getElementById("signin").style.display = "block";
+    if (password == "") {
+        document.getElementById("loginPasswordError").innerHTML = "Please enter your password.";
+        valid = false;
+    } else if (password.length < 6) {
+        document.getElementById("loginPasswordError").innerHTML = "Password must be at least 6 characters.";
+        valid = false;
     }
 
-    function validateSignup() {
-      var name = document.getElementById("signupName").value;
-      var email = document.getElementById("signupEmail").value;
-      var password = document.getElementById("signupPassword").value;
-      var confirm = document.getElementById("confirmPassword").value;
-      var valid = true;
+    return valid;
+}
 
-      // Reset errors
-      document.getElementById("signupNameError").innerHTML = "";
-      document.getElementById("signupEmailError").innerHTML = "";
-      document.getElementById("signupPasswordError").innerHTML = "";
-      document.getElementById("confirmPasswordError").innerHTML = "";
+function validateSignup() {
+    var name = document.getElementById("signupName").value;
+    var email = document.getElementById("signupEmail").value;
+    var password = document.getElementById("signupPassword").value;
+    var confirm = document.getElementById("confirmPassword").value;
+    var valid = true;
 
-      // Validate name
-      if (name == "") {
+    document.getElementById("signupNameError").innerHTML = "";
+    document.getElementById("signupEmailError").innerHTML = "";
+    document.getElementById("signupPasswordError").innerHTML = "";
+    document.getElementById("confirmPasswordError").innerHTML = "";
+
+    if (name == "") {
         document.getElementById("signupNameError").innerHTML = "Please enter your full name.";
         valid = false;
-      }
+    }
 
-      // Validate email
-      if (email == "") {
+    if (email == "") {
         document.getElementById("signupEmailError").innerHTML = "Please enter your email address.";
         valid = false;
-      } else if (email.indexOf("@") == -1) {
+    } else if (email.indexOf("@") == -1) {
         document.getElementById("signupEmailError").innerHTML = "Please enter a valid email address.";
         valid = false;
-      }
+    }
 
-      // Validate password
-      if (password == "") {
+    if (password == "") {
         document.getElementById("signupPasswordError").innerHTML = "Please enter a password.";
         valid = false;
-      } else if (password.length < 6) {
+    } else if (password.length < 6) {
         document.getElementById("signupPasswordError").innerHTML = "Password must be at least 6 characters.";
         valid = false;
-      }
+    }
 
-      // Validate confirm password
-      if (confirm == "") {
+    if (confirm == "") {
         document.getElementById("confirmPasswordError").innerHTML = "Please confirm your password.";
         valid = false;
-      } else if (password != confirm) {
+    } else if (password != confirm) {
         document.getElementById("confirmPasswordError").innerHTML = "Password and confirm password do not match.";
         valid = false;
-      }
-
-      return valid;
     }
-  </script>
+
+    return valid;
+}
+</script>
 
 </body>
 </html>

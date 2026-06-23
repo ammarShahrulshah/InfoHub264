@@ -197,11 +197,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
         <form method="POST" enctype="multipart/form-data" onsubmit="return validateSubmit()">
             <label>Title *</label>
-            <input type="text" id="title" name="title" placeholder="Enter announcement title" value="<?php echo isset($_POST['title']) ? htmlspecialchars($_POST['title']) : ''; ?>" required>
+            <input type="text" id="title" name="title" placeholder="Enter announcement title" value="<?php echo isset($_POST['title']) ? htmlspecialchars($_POST['title']) : ''; ?>">
             <small id="titleError"></small>
 
             <label>Category *</label>
-            <select id="category" name="category" required>
+            <select id="category" name="category">
                 <option value="">Select category</option>
                 <option value="News" <?php echo (isset($_POST['category']) && $_POST['category']=='News') ? 'selected' : ''; ?>>News</option>
                 <option value="Event" <?php echo (isset($_POST['category']) && $_POST['category']=='Event') ? 'selected' : ''; ?>>Event</option>
@@ -214,7 +214,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
             <small id="departmentError"></small>
 
             <label>Description *</label>
-            <textarea id="description" name="description" rows="6" placeholder="Write your announcement details (minimum 20 characters)" required><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
+            <textarea id="description" name="description" rows="6" placeholder="Write your announcement details (minimum 20 characters)"><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
             <small id="descriptionError"></small>
 
             <label>Upload Image (Optional - JPG, PNG, GIF)</label>
@@ -233,27 +233,31 @@ function validateSubmit() {
     var description = document.getElementById("description").value;
     var valid = true;
 
+    // Reset errors
     document.getElementById("titleError").innerHTML = "";
     document.getElementById("categoryError").innerHTML = "";
     document.getElementById("departmentError").innerHTML = "";
     document.getElementById("descriptionError").innerHTML = "";
     document.getElementById("imageError").innerHTML = "";
 
+    // Validate Title
     if (title == "") {
         document.getElementById("titleError").innerHTML = "Please enter announcement title.";
         valid = false;
     }
 
+    // Validate Category
     if (category == "") {
         document.getElementById("categoryError").innerHTML = "Please select a category.";
         valid = false;
     }
 
+    // Validate Description
     if (description == "") {
         document.getElementById("descriptionError").innerHTML = "Please enter announcement description.";
         valid = false;
     } else if (description.length < 20) {
-        document.getElementById("descriptionError").innerHTML = "Description must be at least 20 characters.";
+        document.getElementById("descriptionError").innerHTML = "Description must be at least 20 characters. Current: " + description.length + " characters.";
         valid = false;
     }
 
