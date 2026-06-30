@@ -11,7 +11,6 @@ body {
     transition: background-color 0.3s, color 0.3s;
 }
 
-/* ========== NAVBAR - PUTIH DENGAN GARIS HITAM ========== */
 .top-nav {
     background: white !important;
     padding: 0 30px !important;  
@@ -26,7 +25,6 @@ body {
     overflow: hidden;  
 }
 
-/* ========== LOGO BESAR ========== */
 .logo-img { 
  height: 100px !important;
     max-height: 85px;
@@ -61,7 +59,6 @@ body {
     background-color: #c82333; 
 }
 
-/* Kontainer Susun Atur (Layout) */
 .layout-container {
  display: flex;
     margin-top: 0px; 
@@ -291,47 +288,6 @@ body {
     gap: 10px;
 }
 
-/* ========== DARK MODE ========== */
-body.dark-theme {
-    background-color: #121212 !important;
-    color: #e0e0e0 !important;
-}
-
-body.dark-theme .top-nav { 
-    background-color: #0b0f19 !important; 
-    border-bottom: 2px solid #333 !important;
-}
-
-body.dark-theme .sidebar { 
-    background-color: #1a1a1a !important; 
-    border-right: 1px solid #2d2d2d !important; 
-}
-
-body.dark-theme .sidebar h3 { color: #777777 !important; }
-body.dark-theme .sidebar ul li a { color: #b3b3b3 !important; }
-body.dark-theme .sidebar ul li a:hover { background-color: #252525 !important; color: #0066ff !important; }
-body.dark-theme .sidebar ul li.active a { background-color: #1e293b !important; color: #38bdf8 !important; }
-
-body.dark-theme .card,
-body.dark-theme .activity-table {
-    background-color: #1a1a1a !important;
-    border: 1px solid #2d2d2d !important;
-}
-
-body.dark-theme .activity-table th { 
-    background-color: #262626 !important; 
-    color: #ffffff !important; 
-}
-
-body.dark-theme .activity-table td { 
-    border-bottom: 1px solid #2d2d2d !important; 
-    color: #e0e0e0 !important; 
-}
-
-body.dark-theme .btn-logout {
-    background-color: #dc3545;
-    color: white;
-}
 
 /* Responsive */
 @media (max-width: 768px) {
