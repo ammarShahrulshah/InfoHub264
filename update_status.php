@@ -25,7 +25,7 @@ $admin_result = $conn->query("SELECT Admin_ID FROM admin WHERE User_ID = '$admin
 $admin_row = $admin_result->fetch_assoc();
 $admin_id = $admin_row['Admin_ID'];
 
-// User ID (the one who submitted the post)
+// User ID 
 $post_result = $conn->query("SELECT User_ID, title FROM post WHERE Post_ID = '$post_id'");
 $post_row = $post_result->fetch_assoc();
 $user_id = $post_row['User_ID'];
